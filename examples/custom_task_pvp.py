@@ -17,6 +17,9 @@ labels to their verbalizations (see the paper for more details on PVPs).
 This file shows an example of a PVP for a new task.
 """
 
+import sys
+sys.path.append('.')
+
 from typing import List
 
 from pet.pvp import PVP, PVPS

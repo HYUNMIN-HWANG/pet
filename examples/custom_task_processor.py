@@ -16,6 +16,9 @@ be added. The DataProcessor is responsible for loading training and test data.
 This file shows an example of a DataProcessor for a new task.
 """
 
+import sys
+sys.path.append('.')
+
 import csv
 import os
 from typing import List

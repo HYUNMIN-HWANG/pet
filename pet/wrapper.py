@@ -142,6 +142,7 @@ class TransformerModelWrapper:
         tokenizer_class = MODEL_CLASSES[self.config.model_type]['tokenizer']
         model_class = MODEL_CLASSES[self.config.model_type][self.config.wrapper_type]
 
+        # import ipdb; ipdb.set_trace()
         model_config = config_class.from_pretrained(
             config.model_name_or_path, num_labels=len(config.label_list), finetuning_task=config.task_name,
             cache_dir=config.cache_dir if config.cache_dir else None, use_cache=False)
@@ -153,8 +154,10 @@ class TransformerModelWrapper:
         if self.config.model_type == 'gpt2':
             self.tokenizer.pad_token, self.tokenizer.mask_token = self.tokenizer.eos_token, self.tokenizer.eos_token
 
-        self.model = model_class.from_pretrained(config.model_name_or_path, config=model_config,
-                                                 cache_dir=config.cache_dir if config.cache_dir else None)
+        self.model = model_class.from_pretrained(
+            config.model_name_or_path, config=model_config,
+            cache_dir=config.cache_dir if config.cache_dir else None)
+        
         #Multi GPU Training
         n_gpus = torch.cuda.device_count()
         if n_gpus >1:
@@ -196,7 +199,8 @@ class TransformerModelWrapper:
             return jsonpickle.decode(f.read())
 
     def train(self, task_train_data: List[InputExample], device, per_gpu_train_batch_size: int = 8, n_gpu: int = 1,
-              num_train_epochs: int = 3, gradient_accumulation_steps: int = 1, weight_decay: float = 0.0,
+              num_train_epochs: int = 1, #3, 
+              gradient_accumulation_steps: int = 1, weight_decay: float = 0.0,
               learning_rate: float = 5e-5, adam_epsilon: float = 1e-8, warmup_steps=0, max_grad_norm: float = 1,
               logging_steps: int = 50, per_gpu_unlabeled_batch_size: int = 8, unlabeled_data: List[InputExample] = None,
               lm_training: bool = False, use_logits: bool = False, alpha: float = 0.8, temperature: float = 1,
@@ -273,6 +277,7 @@ class TransformerModelWrapper:
 
         train_iterator = trange(int(num_train_epochs), desc="Epoch")
 
+        # import ipdb; ipdb.set_trace()
         for _ in train_iterator:
             epoch_iterator = tqdm(train_dataloader, desc="Iteration")
             for _, batch in enumerate(epoch_iterator):
@@ -311,7 +316,7 @@ class TransformerModelWrapper:
 
                 tr_loss += loss.item()
                 if (step + 1) % gradient_accumulation_steps == 0:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_grad_norm)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_grad_norm)  # Gradient clipping :  gradient vector가 방향은 유지하되 적은 값만큼 이동하여 도달하려고 하는 곳으로 안정적으로 내려가게 된다.
                     optimizer.step()
                     scheduler.step()
                     self.model.zero_grad()
@@ -367,7 +372,7 @@ class TransformerModelWrapper:
             labels = batch['labels']
             indices = batch['idx']
             with torch.no_grad():
-
+                # import ipdb; ipdb.set_trace()
                 # some tasks require special evaluation
                 logits = self.task_helper.eval_step(batch,
                                                     decoding_strategy=decoding_strategy) if self.task_helper else None
@@ -432,6 +437,7 @@ class TransformerModelWrapper:
 
     def _mask_tokens(self, input_ids):
         """ Prepare masked tokens inputs/labels for masked language modeling: 80% MASK, 10% random, 10% original. """
+        import ipdb; ipdb.set_trace()
         labels = input_ids.clone()
         # We sample a few tokens in each sequence for masked-LM training (with probability 0.15)
         probability_matrix = torch.full(labels.shape, 0.15)
@@ -462,6 +468,7 @@ class TransformerModelWrapper:
         return input_ids, labels
 
     def generate_default_inputs(self, batch: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        # import ipdb; ipdb.set_trace()
         """Generate the default inputs required by almost every language model."""
         inputs = {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}
         if self.config.model_type in ['bert', 'xlnet']:
@@ -472,7 +479,7 @@ class TransformerModelWrapper:
                        unlabeled_batch: Optional[Dict[str, torch.Tensor]] = None, lm_training: bool = False,
                        alpha: float = 0, **_) -> torch.Tensor:
         """Perform a MLM training step."""
-
+        # import ipdb; ipdb.set_trace()
         inputs = self.generate_default_inputs(labeled_batch)
         mlm_labels, labels = labeled_batch['mlm_labels'], labeled_batch['labels']
 
@@ -489,7 +496,7 @@ class TransformerModelWrapper:
 
     def plm_train_step(self, labeled_batch: Dict[str, torch.Tensor], lm_training: bool = False, **_):
         """Perform a PLM training step."""
-
+        import ipdb; ipdb.set_trace()
         inputs = self.generate_default_inputs(labeled_batch)
         inputs['perm_mask'], inputs['target_mapping'] = labeled_batch['perm_mask'], labeled_batch['target_mapping']
         labels = labeled_batch['labels']

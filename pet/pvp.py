@@ -118,7 +118,7 @@ class PVP(ABC):
         :param labeled: if ``priming=True``, whether the label should be appended to this example
         :return: A tuple, consisting of a list of input ids and a list of token type ids
         """
-
+        # import ipdb; ipdb.set_trace()
         if not priming:
             assert not labeled, "'labeled' can only be set to true if 'priming' is also set to true"
 
@@ -204,17 +204,20 @@ class PVP(ABC):
         pass
 
     def get_mask_positions(self, input_ids: List[int]) -> List[int]:
+        # import ipdb; ipdb.set_trace()
         label_idx = input_ids.index(self.mask_id)
         labels = [-1] * len(input_ids)
         labels[label_idx] = 1
         return labels
 
     def convert_mlm_logits_to_cls_logits(self, mlm_labels: torch.Tensor, logits: torch.Tensor) -> torch.Tensor:
+        # import ipdb; ipdb.set_trace()
         masked_logits = logits[mlm_labels >= 0]
         cls_logits = torch.stack([self._convert_single_mlm_logits_to_cls_logits(ml) for ml in masked_logits])
         return cls_logits
 
     def _convert_single_mlm_logits_to_cls_logits(self, logits: torch.Tensor) -> torch.Tensor:
+        # import ipdb; ipdb.set_trace()
         m2c = self.mlm_logits_to_cls_logits_tensor.to(logits.device)
         # filler_len.shape() == max_fillers
         filler_len = torch.tensor([len(self.verbalize(label)) for label in self.wrapper.config.label_list],
@@ -230,6 +233,7 @@ class PVP(ABC):
         return cls_logits
 
     def convert_plm_logits_to_cls_logits(self, logits: torch.Tensor) -> torch.Tensor:
+        import ipdb; ipdb.set_trace()
         assert logits.shape[1] == 1
         logits = torch.squeeze(logits, 1)  # remove second dimension as we always have exactly one <mask> per example
         cls_logits = torch.stack([self._convert_single_mlm_logits_to_cls_logits(lgt) for lgt in logits])
