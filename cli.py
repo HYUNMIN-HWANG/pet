@@ -280,3 +280,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# python cli.py --method pet --pattern_id 0 1 2 3 --data_dir D:\\Data\\pet_dastaset\\yelp_review_full_csv --model_type roberta --model_name_or_path D:\\pretrain_model\\roberta.large --task_name yelp-full --output_dir E:\\STUDY\\PET\\results --do_train --do_eval
