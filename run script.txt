@@ -1,0 +1,7 @@
+[PET]
+
+python cli.py --method pet --pattern_id 0 1 2 3 --data_dir D:\\Data\\pet_dastaset\\yelp_review_full_csv --model_type roberta --model_name_or_path D:\\pretrain_model\\roberta.large --task_name yelp-full --output_dir E:\\STUDY\\PET\\results --do_train --do_eval
+
+
+[AI Server]
+python cli.py --method pet --pattern_id 0 1 2 3 --data_dir \yelp-review-full --model_type roberta --model_name_or_path \roberta-large --task_name yelp-full --output_dir \results --do_train --do_eval
